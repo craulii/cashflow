@@ -40,7 +40,7 @@ model RefreshToken {
 model Category {
   id        String   @id @default(cuid())
   name      String
-  type      String   // FIXED, VARIABLE, DEBT, INCOME
+  type      String
   icon      String?
   color     String?
   isDefault Boolean  @default(false)
