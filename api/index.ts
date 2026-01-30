@@ -114,11 +114,11 @@ const createExpenseSchema = z.object({
 const createDebtSchema = z.object({
   name: z.string().min(1),
   totalAmount: z.number().positive(),
-  interestRate: z.number().min(0).optional(),
-  minimumPayment: z.number().positive().optional(),
-  dueDate: z.string().transform(v => new Date(v)).optional(),
+  interestRate: z.number().min(0).nullish(),
+  minimumPayment: z.number().positive().nullish(),
+  dueDate: z.string().transform(v => new Date(v)).nullish(),
   startDate: z.string().transform(v => new Date(v)),
-  categoryId: z.string().optional(),
+  categoryId: z.string().nullish(),
 });
 
 const createPaymentSchema = z.object({
