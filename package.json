@@ -13,7 +13,7 @@
     "build": "prisma generate && cd packages/frontend && npm run build",
     "build:backend": "cd packages/backend && npm run build",
     "build:frontend": "cd packages/frontend && npm run build",
-    "postinstall": "prisma generate || true",
+    "postinstall": "npx prisma@5.22.0 generate || true",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",

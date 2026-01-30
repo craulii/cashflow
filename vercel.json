@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "cd packages/frontend && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "packages/frontend/dist",
-  "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
+  "installCommand": "npm install --legacy-peer-deps && npx prisma@5.22.0 generate",
   "framework": null,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" }
