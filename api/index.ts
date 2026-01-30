@@ -752,8 +752,13 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
     return res.status(401).json({ error: err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token' });
   }
+  // Prisma errors
+  if (err.code?.startsWith?.('P')) {
+    console.error('Prisma error:', err.code, err.message);
+    return res.status(500).json({ error: 'Database error', code: err.code, message: err.message });
+  }
   console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
+  res.status(500).json({ error: 'Internal server error', message: err.message, stack: err.stack });
 });
 
 // 404 handler
