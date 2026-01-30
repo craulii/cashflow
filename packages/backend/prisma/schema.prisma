@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categories   Category[]
+  incomes      Income[]
+  expenses     Expense[]
+  debts        Debt[]
+  refreshTokens RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // FIXED, VARIABLE, DEBT, INCOME
+  icon      String?
+  color     String?
+  isDefault Boolean  @default(false)
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incomes  Income[]
+  expenses Expense[]
+  debts    Debt[]
+
+  @@map("categories")
+}
+
+model Income {
+  id          String   @id @default(cuid())
+  amount      Float
+  description String
+  source      String?
+  date        DateTime
+  isRecurring Boolean  @default(false)
+  userId      String
+  categoryId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("incomes")
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  amount      Float
+  description String
+  date        DateTime
+  isRecurring Boolean  @default(false)
+  userId      String
+  categoryId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@map("expenses")
+}
+
+model Debt {
+  id             String    @id @default(cuid())
+  name           String
+  totalAmount    Float
+  remainingAmount Float
+  interestRate   Float?
+  minimumPayment Float?
+  dueDate        DateTime?
+  startDate      DateTime
+  userId         String
+  categoryId     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  payments DebtPayment[]
+
+  @@map("debts")
+}
+
+model DebtPayment {
+  id        String   @id @default(cuid())
+  amount    Float
+  date      DateTime
+  note      String?
+  debtId    String
+  createdAt DateTime @default(now())
+
+  debt Debt @relation(fields: [debtId], references: [id], onDelete: Cascade)
+
+  @@map("debt_payments")
+}
