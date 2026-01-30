@@ -40,10 +40,10 @@ class ApiError extends Error {
 interface TokenPayload { userId: string; email: string; }
 
 const generateAccessToken = (payload: TokenPayload): string =>
-  jwt.sign(payload, config.jwt.secret, { expiresIn: config.jwt.expiresIn });
+  jwt.sign(payload, config.jwt.secret, { expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'] });
 
 const generateRefreshToken = (payload: TokenPayload): string =>
-  jwt.sign(payload, config.jwt.refreshSecret, { expiresIn: config.jwt.refreshExpiresIn });
+  jwt.sign(payload, config.jwt.refreshSecret, { expiresIn: config.jwt.refreshExpiresIn as jwt.SignOptions['expiresIn'] });
 
 const verifyAccessToken = (token: string): TokenPayload =>
   jwt.verify(token, config.jwt.secret) as TokenPayload;
