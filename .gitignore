@@ -39,3 +39,5 @@ packages/backend/prisma/migrations/
 *.tmp
 *.temp
 .claude/
+
+.vercel
