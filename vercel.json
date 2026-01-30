@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "ls -la && cd packages/frontend && npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "packages/frontend/dist",
-  "installCommand": "npm install --legacy-peer-deps && npx prisma@5.22.0 generate",
+  "buildCommand": "cd $VERCEL_GIT_REPO_SLUG 2>/dev/null || cd ../.. && npm install --legacy-peer-deps && npx prisma@5.22.0 generate && cd packages/frontend && npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "../../packages/frontend/dist",
+  "installCommand": "echo 'Install handled in build'",
   "framework": null,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" }

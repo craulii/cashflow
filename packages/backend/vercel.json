@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "buildCommand": "cd ../frontend && npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "../frontend/dist",
+  "installCommand": "npm install --legacy-peer-deps && npx prisma@5.22.0 generate",
+  "framework": null
+}
