@@ -1,7 +1,7 @@
 {
   "version": 2,
   "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "npx prisma@5.22.0 generate && cd packages/frontend && npm install --legacy-peer-deps && ./node_modules/.bin/vite build",
+  "buildCommand": "npx prisma@5.22.0 generate && cd packages/frontend && npm install --legacy-peer-deps && npx vite build",
   "outputDirectory": "packages/frontend/dist",
   "framework": null,
   "rewrites": [

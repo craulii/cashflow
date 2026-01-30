@@ -41,3 +41,4 @@ packages/backend/prisma/migrations/
 .claude/
 
 .vercel
+.env*.local
