@@ -12,6 +12,7 @@ import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { IncomesPage } from '../pages/incomes/IncomesPage';
 import { ExpensesPage } from '../pages/expenses/ExpensesPage';
 import { DebtsPage } from '../pages/debts/DebtsPage';
+import { SavingsPage } from '../pages/savings/SavingsPage';
 import { CategoriesPage } from '../pages/categories/CategoriesPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 
@@ -85,6 +86,7 @@ export function AppRoutes() {
         <Route path="incomes" element={<IncomesPage />} />
         <Route path="expenses" element={<ExpensesPage />} />
         <Route path="debts" element={<DebtsPage />} />
+        <Route path="savings" element={<SavingsPage />} />
         <Route path="categories" element={<CategoriesPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>

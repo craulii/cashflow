@@ -9,124 +9,117 @@ Aplicación web multi-usuario para gestión de economía del hogar con sistema d
 - **Gestión de ingresos** con filtros y resúmenes
 - **Gestión de gastos** categorizados (fijos y variables)
 - **Seguimiento de deudas** con historial de pagos
+- **Gestión de ahorros** con metas y seguimiento
+- **Categorías personalizables** creadas por el usuario
 - **Análisis mensual** y comparativo de finanzas
 
 ## Stack Tecnológico
 
 | Capa | Tecnología |
 |------|------------|
-| Backend | Node.js + Express + TypeScript |
+| Backend | Node.js + Express + TypeScript (Vercel Serverless) |
 | Frontend | React + Vite + TypeScript |
-| Base de Datos | SQLite + Prisma ORM |
+| Base de Datos | PostgreSQL (Supabase) + Prisma ORM |
 | Autenticación | JWT + bcrypt |
 | Gráficos | Recharts |
 | Estilos | TailwindCSS |
 | Estado | Zustand + React Query |
+| Deploy | Vercel |
+
+## Demo
+
+**URL Producción:** https://cash-livid-pi.vercel.app
 
 ## Requisitos Previos
 
 - Node.js >= 18.0.0
-- pnpm >= 8.0.0
+- npm >= 9.0.0
+- Cuenta en Supabase (gratis)
+- Cuenta en Vercel (gratis)
 
-## Instalación
+## Instalación Local
 
 1. Clonar el repositorio:
 ```bash
-git clone <repository-url>
-cd cash
+git clone https://github.com/craulii/cashflow.git
+cd cashflow
 ```
 
 2. Instalar dependencias:
 ```bash
-pnpm install
+npm install
 ```
 
 3. Configurar variables de entorno:
 ```bash
-cp .env.example packages/backend/.env
+# Crear archivo .env en la raíz con:
+DATABASE_URL="postgresql://postgres:PASSWORD@db.PROJECT.supabase.co:5432/postgres"
+DIRECT_URL="postgresql://postgres:PASSWORD@db.PROJECT.supabase.co:5432/postgres"
+JWT_SECRET="tu-secret-key"
+JWT_REFRESH_SECRET="tu-refresh-secret-key"
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# Crear packages/frontend/.env con:
+VITE_API_URL=http://localhost:3001/api
 ```
 
-4. Generar cliente Prisma y ejecutar migraciones:
+4. Configurar base de datos:
 ```bash
-pnpm db:generate
-pnpm db:push
+npm run db:push    # Crear tablas
+npm run db:seed    # Crear categorías por defecto
 ```
 
-5. (Opcional) Ejecutar seed con datos de ejemplo:
+5. Iniciar desarrollo:
 ```bash
-pnpm db:seed
+npm run dev
 ```
 
-## Desarrollo
+## Despliegue en Vercel
 
-Iniciar ambos servidores (backend y frontend):
-```bash
-pnpm dev
-```
+### 1. Configurar Supabase
 
-O iniciar por separado:
-```bash
-# Backend (puerto 3001)
-pnpm dev:backend
+1. Crear proyecto en [supabase.com](https://supabase.com)
+2. Obtener la URL de conexión (Transaction mode, puerto 6543):
+   ```
+   postgresql://postgres.PROJECT:PASSWORD@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+   ```
 
-# Frontend (puerto 5173)
-pnpm dev:frontend
-```
+### 2. Configurar Vercel
+
+1. Importar repositorio en [vercel.com](https://vercel.com)
+2. Configurar variables de entorno:
+
+| Variable | Valor |
+|----------|-------|
+| `DATABASE_URL` | URL de Supabase con `?pgbouncer=true` |
+| `DIRECT_URL` | URL directa de Supabase (puerto 5432) |
+| `JWT_SECRET` | Clave secreta para tokens |
+| `JWT_REFRESH_SECRET` | Clave secreta para refresh tokens |
+| `JWT_EXPIRES_IN` | `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | `7d` |
+| `NODE_ENV` | `production` |
+
+3. Deploy automático
+
+### Notas importantes de despliegue
+
+- **Root Directory:** Dejar vacío o `./`
+- **Framework:** Other (no Vite)
+- **DATABASE_URL debe usar el pooler** de Supabase con `?pgbouncer=true` para evitar errores de "prepared statement already exists"
+- **VITE_API_URL** en frontend debe ser `/api` para producción
 
 ## Scripts Disponibles
 
 | Script | Descripción |
 |--------|-------------|
-| `pnpm dev` | Inicia ambos servidores en modo desarrollo |
-| `pnpm dev:backend` | Inicia solo el backend |
-| `pnpm dev:frontend` | Inicia solo el frontend |
-| `pnpm build` | Compila ambos proyectos |
-| `pnpm db:generate` | Genera el cliente Prisma |
-| `pnpm db:migrate` | Ejecuta migraciones pendientes |
-| `pnpm db:push` | Sincroniza schema con BD (dev) |
-| `pnpm db:seed` | Ejecuta seeders |
-| `pnpm db:studio` | Abre Prisma Studio |
-
-## Estructura del Proyecto
-
-```
-cash/
-├── package.json
-├── pnpm-workspace.yaml
-├── .env.example
-├── README.md
-├── CLAUDE.md
-│
-└── packages/
-    ├── backend/
-    │   ├── prisma/schema.prisma
-    │   └── src/
-    │       ├── index.ts
-    │       ├── app.ts
-    │       ├── config/
-    │       ├── middlewares/
-    │       ├── modules/
-    │       │   ├── auth/
-    │       │   ├── users/
-    │       │   ├── income/
-    │       │   ├── expenses/
-    │       │   ├── categories/
-    │       │   ├── debts/
-    │       │   └── analytics/
-    │       └── utils/
-    │
-    └── frontend/
-        └── src/
-            ├── main.tsx
-            ├── App.tsx
-            ├── api/
-            ├── components/
-            ├── pages/
-            ├── hooks/
-            ├── store/
-            ├── routes/
-            └── utils/
-```
+| `npm run dev` | Inicia ambos servidores en modo desarrollo |
+| `npm run dev:backend` | Inicia solo el backend |
+| `npm run dev:frontend` | Inicia solo el frontend |
+| `npm run build` | Compila el proyecto |
+| `npm run db:push` | Sincroniza schema con BD |
+| `npm run db:seed` | Ejecuta seeders |
+| `npm run db:studio` | Abre Prisma Studio |
 
 ## API Endpoints
 
@@ -143,39 +136,38 @@ cash/
 ### Ingresos
 - `GET /api/incomes` - Listar ingresos
 - `POST /api/incomes` - Crear ingreso
-- `GET /api/incomes/:id` - Obtener ingreso
 - `PATCH /api/incomes/:id` - Actualizar ingreso
 - `DELETE /api/incomes/:id` - Eliminar ingreso
-- `GET /api/incomes/summary` - Resumen de ingresos
 
 ### Gastos
 - `GET /api/expenses` - Listar gastos
 - `POST /api/expenses` - Crear gasto
-- `GET /api/expenses/:id` - Obtener gasto
 - `PATCH /api/expenses/:id` - Actualizar gasto
 - `DELETE /api/expenses/:id` - Eliminar gasto
-- `GET /api/expenses/by-category` - Gastos por categoría
 
 ### Categorías
-- `GET /api/categories` - Listar categorías
-- `POST /api/categories` - Crear categoría
+- `GET /api/categories` - Listar categorías (default + usuario)
+- `POST /api/categories` - Crear categoría personalizada
 - `PATCH /api/categories/:id` - Actualizar categoría
 - `DELETE /api/categories/:id` - Eliminar categoría
 
 ### Deudas
 - `GET /api/debts` - Listar deudas
 - `POST /api/debts` - Crear deuda
-- `GET /api/debts/:id` - Obtener deuda
 - `PATCH /api/debts/:id` - Actualizar deuda
 - `DELETE /api/debts/:id` - Eliminar deuda
 - `POST /api/debts/:id/payments` - Registrar pago
-- `GET /api/debts/:id/payments` - Historial de pagos
+
+### Ahorros
+- `GET /api/savings` - Listar metas de ahorro
+- `POST /api/savings` - Crear meta de ahorro
+- `PATCH /api/savings/:id` - Actualizar meta
+- `DELETE /api/savings/:id` - Eliminar meta
+- `POST /api/savings/:id/deposits` - Agregar depósito
 
 ### Analíticas
 - `GET /api/analytics/dashboard` - Datos del dashboard
 - `GET /api/analytics/monthly` - Resumen mensual
-- `GET /api/analytics/comparison` - Comparativa
-- `GET /api/analytics/trends` - Tendencias
 
 ## Licencia
 

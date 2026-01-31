@@ -4,6 +4,7 @@ import {
   TrendingUp,
   TrendingDown,
   CreditCard,
+  PiggyBank,
   FolderTree,
   Settings,
   LogOut,
@@ -17,6 +18,7 @@ const navItems = [
   { to: '/incomes', icon: TrendingUp, label: 'Ingresos' },
   { to: '/expenses', icon: TrendingDown, label: 'Gastos' },
   { to: '/debts', icon: CreditCard, label: 'Deudas' },
+  { to: '/savings', icon: PiggyBank, label: 'Ahorros' },
   { to: '/categories', icon: FolderTree, label: 'Categorias' },
 ];
 

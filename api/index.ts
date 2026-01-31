@@ -750,6 +750,132 @@ app.get('/api/analytics/monthly', authenticate, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// ============ SAVINGS ROUTES ============
+const createSavingSchema = z.object({
+  name: z.string().min(1),
+  targetAmount: z.number().positive(),
+  targetDate: z.string().nullish().transform(v => v ? new Date(v) : null),
+  description: z.string().nullish(),
+  color: z.string().nullish(),
+});
+
+const createSavingDepositSchema = z.object({
+  amount: z.number().positive(),
+  date: z.string().transform(v => new Date(v)),
+  note: z.string().nullish(),
+});
+
+app.get('/api/savings', authenticate, async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const savings = await prisma.saving.findMany({
+      where: { userId },
+      include: { deposits: { orderBy: { date: 'desc' }, take: 5 } },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json({ data: savings });
+  } catch (e) { next(e); }
+});
+
+app.get('/api/savings/summary', authenticate, async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const savings = await prisma.saving.findMany({ where: { userId } });
+    const totalTarget = savings.reduce((sum, s) => sum + s.targetAmount, 0);
+    const totalCurrent = savings.reduce((sum, s) => sum + s.currentAmount, 0);
+    res.json({ data: {
+      totalSavings: savings.length,
+      totalTarget,
+      totalCurrent,
+      totalRemaining: totalTarget - totalCurrent,
+      percentComplete: totalTarget > 0 ? (totalCurrent / totalTarget) * 100 : 0,
+    }});
+  } catch (e) { next(e); }
+});
+
+app.get('/api/savings/:id', authenticate, async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const saving = await prisma.saving.findFirst({
+      where: { id: req.params.id, userId },
+      include: { deposits: { orderBy: { date: 'desc' } } },
+    });
+    if (!saving) throw ApiError.notFound('Saving not found');
+    res.json({ data: saving });
+  } catch (e) { next(e); }
+});
+
+app.post('/api/savings', authenticate, validate(createSavingSchema), async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const saving = await prisma.saving.create({
+      data: { ...req.body, userId },
+    });
+    res.status(201).json({ data: saving });
+  } catch (e) { next(e); }
+});
+
+app.patch('/api/savings/:id', authenticate, async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const saving = await prisma.saving.findFirst({ where: { id: req.params.id, userId } });
+    if (!saving) throw ApiError.notFound('Saving not found');
+
+    const data: any = { ...req.body };
+    if (data.targetDate === '' || data.targetDate === null) data.targetDate = null;
+    else if (data.targetDate) data.targetDate = new Date(data.targetDate);
+
+    const updated = await prisma.saving.update({
+      where: { id: req.params.id },
+      data,
+    });
+    res.json({ data: updated });
+  } catch (e) { next(e); }
+});
+
+app.delete('/api/savings/:id', authenticate, async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const saving = await prisma.saving.findFirst({ where: { id: req.params.id, userId } });
+    if (!saving) throw ApiError.notFound('Saving not found');
+    await prisma.saving.delete({ where: { id: req.params.id } });
+    res.json({ data: { message: 'Saving deleted' } });
+  } catch (e) { next(e); }
+});
+
+app.post('/api/savings/:id/deposits', authenticate, validate(createSavingDepositSchema), async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const saving = await prisma.saving.findFirst({ where: { id: req.params.id, userId } });
+    if (!saving) throw ApiError.notFound('Saving not found');
+
+    const deposit = await prisma.savingDeposit.create({
+      data: { ...req.body, savingId: req.params.id },
+    });
+
+    await prisma.saving.update({
+      where: { id: req.params.id },
+      data: { currentAmount: { increment: req.body.amount } },
+    });
+
+    res.status(201).json({ data: deposit });
+  } catch (e) { next(e); }
+});
+
+app.get('/api/savings/:id/deposits', authenticate, async (req, res, next) => {
+  try {
+    const userId = (req as any).user.id;
+    const saving = await prisma.saving.findFirst({ where: { id: req.params.id, userId } });
+    if (!saving) throw ApiError.notFound('Saving not found');
+
+    const deposits = await prisma.savingDeposit.findMany({
+      where: { savingId: req.params.id },
+      orderBy: { date: 'desc' },
+    });
+    res.json({ data: deposits });
+  } catch (e) { next(e); }
+});
+
 // ============ ERROR HANDLER ============
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof ApiError) {
