@@ -513,9 +513,18 @@ app.patch('/api/debts/:id', authenticate, async (req, res, next) => {
     const debt = await prisma.debt.findFirst({ where: { id: req.params.id, userId } });
     if (!debt) throw ApiError.notFound('Debt not found');
 
+    // Clean data - convert empty strings to null
+    const data: any = { ...req.body };
+    if (data.dueDate === '' || data.dueDate === null) data.dueDate = null;
+    else if (data.dueDate) data.dueDate = new Date(data.dueDate);
+    if (data.startDate) data.startDate = new Date(data.startDate);
+    if (data.categoryId === '') data.categoryId = null;
+    if (data.interestRate === '') data.interestRate = null;
+    if (data.minimumPayment === '') data.minimumPayment = null;
+
     const updated = await prisma.debt.update({
       where: { id: req.params.id },
-      data: req.body,
+      data,
       include: { category: true },
     });
     res.json({ data: updated });
