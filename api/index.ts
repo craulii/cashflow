@@ -116,9 +116,9 @@ const createDebtSchema = z.object({
   totalAmount: z.number().positive(),
   interestRate: z.number().min(0).nullish(),
   minimumPayment: z.number().positive().nullish(),
-  dueDate: z.string().transform(v => new Date(v)).nullish(),
+  dueDate: z.string().nullish().transform(v => v ? new Date(v) : null),
   startDate: z.string().transform(v => new Date(v)),
-  categoryId: z.string().nullish(),
+  categoryId: z.string().nullish().transform(v => v || null),
 });
 
 const createPaymentSchema = z.object({
